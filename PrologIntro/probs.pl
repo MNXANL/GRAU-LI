@@ -5,6 +5,11 @@ pert(X,[_|L]):- pert(X,L).
 concat([],L,L).
 concat([X|L1],L2,[X|L3]):- concat(L1,L2,L3). 	
 
+sum([], 0).
+sum([X|L], P):-
+	sum(L, P1),
+	P is P1+X.
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -80,10 +85,6 @@ fib(N, F):-
 %% P como N vienen instanciados. El predicado debe ser capaz de generar todas las
 %% soluciones posibles.
 
-sum([], 0).
-sum([X|L], P):-
-	sum(L, P1),
-	P is P1+X.
 
 dados(_, 0, []).
 
@@ -101,10 +102,10 @@ dados(P1, N1, L):-
 %% teros L, se satisface si existe algún elemento en L que es igual a la suma de los
 %% demás elementos de L, y falla en caso contrario.
 
-suma_demas(L, X):- 
+suma_demas(L):- 
 	concat(L1, [X|L2], L),
 	sum(L1, Y),	sum(L2, Z),
-	X = Y+Z.
+	X = Y+Z, !.
 
 %% 9. (dificultad 2) Escribe un predicado suma ants(L) que, dada una lista de ente-
 %% ros L, se satisface si existe algún elemento en L que es igual a la suma de los
@@ -112,7 +113,8 @@ suma_demas(L, X):-
 
 suma_ants(L):-
 	concat(L1, [X|_], L),
-	sum(L1, Y), X = Y.
+	sum(L1, Y), 
+	X = Y, !.
 
 %% 10. (dificultad 2) Escribe un predicado card(L) que, dada una lista de enteros L,
 %% escriba la lista que, para cada elemento de L, dice cuántas veces aparece este
@@ -120,3 +122,5 @@ suma_ants(L):-
 %% [[1,3],[2,1],[5,1],[3,2],[7,1]].
 
 
+card([]).
+card([X|L], X).
