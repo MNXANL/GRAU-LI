@@ -44,32 +44,68 @@ adjacency(20, [12,6,18,7,16]).
 %%% end input
 
 
+% MANDATORY: 
+%	Use the SAT var [visited-I-P] meaning "node I is visited in position P"
+% 	More variables might be needed.
+
+
 %Helpful prolog predicates:
 position(P):- numNodes(N), between(0,N,P).
 node(I):-     adjacency(I,_).
 
+positionWithSuccessor(P1, P2):- numNodes(N), N1 is N-1, between(0,N1,P1), P2 is P1+1.
+
+
 setStartAndFinish:- 
 	numNodes(N),  
-	writeClause([ visited-1-0 ]),  writeClause([ visited-1-N ]), 
+	writeClause([ visited-1-0 ]),  
+	writeClause([ visited-1-N ]), 
 	fail.
 setStartAndFinish.
 
+% Example of a non-binary clause
+aNodeThenVisitsANeighbour:-
+	adjacency(N1, ListNextEdges),
+	positionWithSuccessor(P1, P2),
+	findall(visited-N2-P2, member(N2, ListNextEdges), Lits),
+	writeClause([\+visited-N1-P1 | Lits]), 
+	fail.
+aNodeThenVisitsANeighbour.
+
 allNodesVisitedExactlyOnce:-
-	node(N),
-	N > 1,
+	node(N),	N > 1,
 	findall(visited-N-P, position(P), Lits),
 	exactly(1, Lits),
 	fail.
-%% allNodesVisitedExactlyOnce:-
-%% 	findall(visited-1-P, position(P), Lits),
-%% 	exactly(2, Lits),
-%% 	fail.
 allNodesVisitedExactlyOnce.
+
+
+getCost(visited-N1-_, visited-1-20, Val):-
+	M1 is N1 mod 2,
+	M2 is 0,
+	Val is abs(M1 - M2).
+getCost(visited-N1-_, [visited-N2-_|Lst], Val):-
+	M1 is N1 mod 2,
+	M2 is N2 mod 2,
+	X is abs(M1 - M2),
+	getCost(visited-N2-_, Lst, X1),
+	Val is X1+X.
+
+pathHasAtMostMaxCost:-
+	findall(visited-N-P, (node(N), position(P), N>1, P>1), Lits),
+	getCost(visited-1-1, Lits, X),
+	maxCost(MC),
+	X < MC,
+	write('COST is '), X, nl,
+	fail.
+pathHasAtMostMaxCost.
 
 
 writeClauses:-
     setStartAndFinish,
+    aNodeThenVisitsANeighbour,
     allNodesVisitedExactlyOnce,
+    pathHasAtMostMaxCost,
     true.
 
 

@@ -2,16 +2,16 @@
 symbolicOutput(0).  % set to 1 to see symbolic output only; 0 otherwise.
 
 entrada([ [-,4,-,  -,-,-,  -,1,-],          % 6 4 3  9 7 5  2 1 8 
-          [-,-,8,  -,3,-,  9,-,-],          % 2 7 8  4 3 1  9 5 6 
-          [-,-,-,  6,8,2,  -,-,-],          % 5 1 9  6 8 2  3 4 7 
+		  [-,-,8,  -,3,-,  9,-,-],          % 2 7 8  4 3 1  9 5 6 
+		  [-,-,-,  6,8,2,  -,-,-],          % 5 1 9  6 8 2  3 4 7 
 
-          [3,2,-,  -,6,-,  -,7,9],          % 3 2 5  8 6 4  1 7 9 
-          [-,-,7,  -,-,-,  4,-,-],          % 1 8 7  3 5 9  4 6 2 
-          [9,6,-,  -,1,-,  -,8,3],          % 9 6 4  2 1 7  5 8 3 
+		  [3,2,-,  -,6,-,  -,7,9],          % 3 2 5  8 6 4  1 7 9 
+		  [-,-,7,  -,-,-,  4,-,-],          % 1 8 7  3 5 9  4 6 2 
+		  [9,6,-,  -,1,-,  -,8,3],          % 9 6 4  2 1 7  5 8 3 
 
-          [-,-,-,  7,9,8,  -,-,-],          % 4 5 2  7 9 8  6 3 1 
-          [-,-,1,  -,2,-,  7,-,-],          % 8 3 1  5 2 6  7 9 4 
-          [-,9,-,  -,-,-,  -,2,-] ]).       % 7 9 6  1 4 3  8 2 5 
+		  [-,-,-,  7,9,8,  -,-,-],          % 4 5 2  7 9 8  6 3 1 
+		  [-,-,1,  -,2,-,  7,-,-],          % 8 3 1  5 2 6  7 9 4 
+		  [-,9,-,  -,-,-,  -,2,-] ]).       % 7 9 6  1 4 3  8 2 5 
 
 %%%%%% Some helpful definitions to make the code cleaner:
 row(I):-between(1,9,I).
@@ -24,14 +24,17 @@ squareOfBlock( Iid,Jid, I,J ):- row(I), col(J),  Iid is (I-1) // 3,  Jid is (J-1
 % x-i-j-k meaning "square IJ gets value K",    1<=i<=9, 1<=j<=9, 1<=k<=9   9^3= 729 variables
 
 writeClauses:- 
-    filledInputValues,         % for each filled-in value of the input, add a unit clause
-    eachIJexactlyOneK,         % each square IJ gets exactly one value K
-    eachJKexactlyOneI,         % each column J each value K in exactly one row I
-    eachIKexactlyOneJ,         % each row    I each value K in exactly one column J
-    eachBlockEachKexactlyOnce, % each 3x3 block gets each value K exactly once.
-    true.
+	filledInputValues,         % for each filled-in value of the input, add a unit clause
+	eachIJexactlyOneK,         % each square IJ gets exactly one value K
+	eachJKexactlyOneI,         % each column J each value K in exactly one row I
+	eachIKexactlyOneJ,         % each row    I each value K in exactly one column J
+	eachBlockEachKexactlyOnce, % each 3x3 block gets each value K exactly once.
+	true.
 
-filledInputValues:- entrada(Sud), nth1(I,Sud,Row), nth1(J,Row,K), integer(K), writeClause([ x-I-J-K ]), fail.
+filledInputValues:- 
+	entrada(Sud), nth1(I,Sud,Row), nth1(J,Row,K), integer(K), 
+  	writeClause([ x-I-J-K ]), 
+  	fail.
 filledInputValues.
 
 eachIJexactlyOneK:- row(I), col(J), findall( x-I-J-K, val(K), Lits ), exactly(1,Lits), fail.
@@ -40,11 +43,13 @@ eachIJexactlyOneK.
 eachJKexactlyOneI:- col(J), val(K), findall( x-I-J-K, row(I), Lits ), exactly(1,Lits), fail.
 eachJKexactlyOneI.
 
-eachIKexactlyOneJ:- row(I), val(K), findall( x-I-J-K, col(J), Lits ), exactly(1,Lits), fail.
+eachIKexactlyOneJ:- row(I), val(K), 
+	findall( x-I-J-K, col(J), Lits ), 
+	exactly(1,Lits), fail.
 eachIKexactlyOneJ.
 
 eachBlockEachKexactlyOnce:- blockID(Iid,Jid), 
-        val(K), findall( x-I-J-K, squareOfBlock(Iid,Jid,I,J), Lits ), exactly(1,Lits), fail.
+		val(K), findall( x-I-J-K, squareOfBlock(Iid,Jid,I,J), Lits ), exactly(1,Lits), fail.
 eachBlockEachKexactlyOnce.
 
 %%%%%%%%%%%%%%%%%%%%%%%
