@@ -44,8 +44,9 @@ adjacency(20, [12,6,18,7,16]).
 %%% end input
 
 
-% MANDATORY: 
-%	Use the SAT var [visited-I-P] meaning "node I is visited in position P"
+%MANDATORY: 
+% Use the SAT var [visited-I-P] meaning "node I is visited in position P"
+% Also use the SAT var [cost-N1-N2-C] meaning "nodes N1->N2 have cost C"
 % 	More variables might be needed.
 
 
@@ -80,23 +81,47 @@ allNodesVisitedExactlyOnce:-
 allNodesVisitedExactlyOnce.
 
 
-getCost(visited-N1-_, visited-1-20, Val):-
-	M1 is N1 mod 2,
-	M2 is 0,
-	Val is abs(M1 - M2).
+
 getCost(visited-N1-_, [visited-N2-_|Lst], Val):-
 	M1 is N1 mod 2,
 	M2 is N2 mod 2,
-	X is abs(M1 - M2),
+	C is abs(M1-M2),
+	write('  -> C = '), write(C), nl,
 	getCost(visited-N2-_, Lst, X1),
-	Val is X1+X.
+	Val is X1 + C.
+getCost(visited-_-_, [], 0).
+
+
+
+
+
+twoVisitedNodesHaveACost:-
+	adjacency(N1, ListNextEdges),
+	positionWithSuccessor(P1, P2),
+	member(N2, ListNextEdges),
+	M1 is N1 mod 2,	M2 is N2 mod 2,	
+	C is abs(M1-M2),
+	
+	writeClause([\+visited-N1-P1, \+visited-N2-P2, cost-N1-N2-C]), 
+	fail.
+twoVisitedNodesHaveACost.
+
+
+costUsedAMO:-
+	adjacency(N1, ListNextEdges),
+	
+	findall(cost-N1-N2-_, member(N2, ListNextEdges), Lits),
+	atMost(1, Lits),
+	fail.
+costUsedAMO.
 
 pathHasAtMostMaxCost:-
-	findall(visited-N-P, (node(N), position(P), N>1, P>1), Lits),
-	getCost(visited-1-1, Lits, X),
-	maxCost(MC),
-	X < MC,
-	write('COST is '), X, nl,
+	adjacency(N1, ListNextEdges),
+	maxCost(MVal),
+	
+	findall(cost-N1-N2-_, member(N2, ListNextEdges), Lits),
+	sumOfCosts(Lits, Val),
+	%MVal >= Val,
 	fail.
 pathHasAtMostMaxCost.
 
@@ -105,10 +130,22 @@ writeClauses:-
     setStartAndFinish,
     aNodeThenVisitsANeighbour,
     allNodesVisitedExactlyOnce,
+
+    twoVisitedNodesHaveACost,
+    costUsedAMO,
     pathHasAtMostMaxCost,
     true.
 
+sumOfCosts([cost-_-_-C|Lits], Val):-
+	sumOfCosts(Lits, Vsub),
+	Val is Vsub+C.
+sumOfCosts([], 0).
+	
 
+
+displayCost(M):- findall(cost-_-_-C, member(cost-_-_-C, M), Lits), sumOfCosts(Lits, Val), write('Cost = '), write(Val), true.
+displayCost(_):- nl.
+	
 %% Display solution
 displaySol(M):- position(P), member(visited-Node-P,M), write(Node), write(' '), fail.
 displaySol(_):- nl.
@@ -163,7 +200,7 @@ main:-  initClauseGeneration,
 	treatResult(Result),!.
 
 treatResult(20):- write('Unsatisfiable'), nl, halt.
-treatResult(10):- write('Solution found: '), nl, see(model), symbolicModel(M), seen, displaySol(M), nl,nl,halt.
+treatResult(10):- write('Solution found: '), nl, see(model), symbolicModel(M), seen, displaySol(M), nl, displayCost(M), nl,halt.
 
 initClauseGeneration:-  %initialize all info about variables and clauses:
 	retractall(numClauses(   _)),
