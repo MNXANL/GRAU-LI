@@ -46,7 +46,7 @@ adjacency(20, [12,6,18,7,16]).
 
 %MANDATORY: 
 % Use the SAT var [visited-I-P] meaning "node I is visited in position P"
-% Also use the SAT var [cost-N1-N2-C] meaning "nodes N1->N2 have cost C"
+% Also use the SAT var [cost-C] meaning "nodes N1->N2 have cost C"
 % 	More variables might be needed.
 
 
@@ -54,8 +54,12 @@ adjacency(20, [12,6,18,7,16]).
 position(P):- numNodes(N), between(0,N,P).
 node(I):-     adjacency(I,_).
 
+% More helpfulness
 positionWithSuccessor(P1, P2):- numNodes(N), N1 is N-1, between(0,N1,P1), P2 is P1+1.
+cost(N1, N2, C):-	X1 is N1 mod 2,	X2 is N2 mod 2, C is abs(X1 - X2).
 
+
+%% Clauses
 
 setStartAndFinish:- 
 	numNodes(N),  
@@ -63,6 +67,7 @@ setStartAndFinish:-
 	writeClause([ visited-1-N ]), 
 	fail.
 setStartAndFinish.
+
 
 % Example of a non-binary clause
 aNodeThenVisitsANeighbour:-
@@ -73,6 +78,7 @@ aNodeThenVisitsANeighbour:-
 	fail.
 aNodeThenVisitsANeighbour.
 
+
 allNodesVisitedExactlyOnce:-
 	node(N),	N > 1,
 	findall(visited-N-P, position(P), Lits),
@@ -81,47 +87,24 @@ allNodesVisitedExactlyOnce:-
 allNodesVisitedExactlyOnce.
 
 
-
-getCost(visited-N1-_, [visited-N2-_|Lst], Val):-
-	M1 is N1 mod 2,
-	M2 is N2 mod 2,
-	C is abs(M1-M2),
-	write('  -> C = '), write(C), nl,
-	getCost(visited-N2-_, Lst, X1),
-	Val is X1 + C.
-getCost(visited-_-_, [], 0).
-
-
-
-
-
-twoVisitedNodesHaveACost:-
+twoVisitedNodesAreBindedToACost:-
 	adjacency(N1, ListNextEdges),
-	positionWithSuccessor(P1, P2),
 	member(N2, ListNextEdges),
+	
+	positionWithSuccessor(P1, P2),
 	M1 is N1 mod 2,	M2 is N2 mod 2,	
 	C is abs(M1-M2),
 	
-	writeClause([\+visited-N1-P1, \+visited-N2-P2, cost-N1-N2-C]), 
+	writeClause([\+visited-N1-P1, \+visited-N2-P2, cost-C]), 
 	fail.
-twoVisitedNodesHaveACost.
+twoVisitedNodesAreBindedToACost.
 
 
-costUsedAMO:-
-	adjacency(N1, ListNextEdges),
-	
-	findall(cost-N1-N2-_, member(N2, ListNextEdges), Lits),
-	atMost(1, Lits),
-	fail.
-costUsedAMO.
 
 pathHasAtMostMaxCost:-
-	adjacency(N1, ListNextEdges),
-	maxCost(MVal),
 	
-	findall(cost-N1-N2-_, member(N2, ListNextEdges), Lits),
-	sumOfCosts(Lits, Val),
-	%MVal >= Val,
+	findall(cost-1, ( adjacency(X, LST), member(Y, LST), cost(X, Y, 1) ), Lits),
+	atMost(10, Lits),
 	fail.
 pathHasAtMostMaxCost.
 
@@ -131,23 +114,18 @@ writeClauses:-
     aNodeThenVisitsANeighbour,
     allNodesVisitedExactlyOnce,
 
-    twoVisitedNodesHaveACost,
-    costUsedAMO,
+    twoVisitedNodesAreBindedToACost,
     pathHasAtMostMaxCost,
     true.
-
-sumOfCosts([cost-_-_-C|Lits], Val):-
-	sumOfCosts(Lits, Vsub),
-	Val is Vsub+C.
-sumOfCosts([], 0).
 	
 
 
-displayCost(M):- findall(cost-_-_-C, member(cost-_-_-C, M), Lits), sumOfCosts(Lits, Val), write('Cost = '), write(Val), true.
+displayCost(M):- findall(cost-1, member(cost-1, M), Lits), write(Lits),
+				 length(Lits, Val), write('Cost = '), write(Val).
 displayCost(_):- nl.
 	
 %% Display solution
-displaySol(M):- position(P), member(visited-Node-P,M), write(Node), write(' '), fail.
+displaySol(M):- position(P), member(visited-Node-P, M), write(Node), write(' '), fail.
 displaySol(_):- nl.
 
 
