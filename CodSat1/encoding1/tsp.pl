@@ -56,6 +56,10 @@ node(I):-     adjacency(I,_).
 
 positionWithSuccessor(P1, P2):- numNodes(N), N1 is N-1, between(0,N1,P1), P2 is P1+1.
 
+% Futureproofing.
+% "A node of partity X has cost X"
+cost(0, 1).
+cost(1, 3).
 
 setStartAndFinish:- 
 	numNodes(N),  
@@ -81,26 +85,25 @@ allNodesVisitedExactlyOnce:-
 allNodesVisitedExactlyOnce.
 
 
+evenNodes(N1, N2):-	
+	M1 is N1 mod 2,	M2 is N2 mod 2,	
+	C is abs(M1-M2),
+	C = 1,
+	true.
+
 
 twoVisitedNodesHaveACost:-
 	adjacency(N1, ListNextEdges),
 	positionWithSuccessor(P1, P2),
 	member(N2, ListNextEdges),
-	M1 is N1 mod 2,	M2 is N2 mod 2,	
-	C is abs(M1-M2),
-	
-	writeClause([\+visited-N1-P1, \+visited-N2-P2, cost-C]), 
+	evenNodes(N1, N2),
+	writeClause([\+visited-N1-P1, \+visited-N2-P2, cost-P2]),
 	fail.
 twoVisitedNodesHaveACost.
 
 
 pathHasAtMostMaxCost:-
-	adjacency(N1, ListNextEdges),
-	positionWithSuccessor(P1, P2),
-	member(N2, ListNextEdges),
-	M1 is N1 mod 2,	M2 is N2 mod 2,	
-	
-	findall([\+visited-N1-P1, \+visited-N2-P2, cost-1], 1 is abs(M1 - M2), Lits),
+	findall(cost-P, position(P), Lits), 
 	maxCost(MVal),
 	atMost(MVal, Lits),
 	fail.
@@ -117,26 +120,8 @@ writeClauses:-
     true.
 
 
-cost(X, Y, C):-
-	X2 is X mod 2,
-	Y2 is Y mod 2,
-	C is abs(X2-Y2).
-
-sumOfCosts([visited-N1-P1|Lits], Val):-
-	head(Lits, visited-N2-P2),
-	cost(N1, N2, C),
-	sumOfCosts(Lits, Vsub),
-	Val is Vsub+C.
-sumOfCosts([visited-_-_], 0).
-	
-
-
 displayCost(M):- 
-	findall(cost-1, (member(cost-1, M)), Lits), write(Lits), 
-	sumOfCosts(Lits, Val), 
-	write('Cost = '), write(Val), 
-	nl, write(' X = '), write(Lits), 
-	true.
+	write('Cost = '), findall(cost-P, (position(P), member(cost-P,M)), Lits), length(Lits, Cost), write(Cost).
 displayCost(_):- nl.
 	
 %% Display solution
