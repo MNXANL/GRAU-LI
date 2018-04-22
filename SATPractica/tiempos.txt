@@ -1,0 +1,10 @@
+
+------------------
+random3SAT/vars-100-1.cnf
+picoSAT:
+SATISFIABLE
+c 329 decisions
+0 s
+misat:
+SATISFIABLE
+0 s
