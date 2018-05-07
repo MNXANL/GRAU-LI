@@ -41,7 +41,7 @@ task(T):-              task(T,_,_,_,_).
 duration(T,D):-        task(T,D,_,_,_).
 earliestStart(T,E):-   task(T,_,E,_,_).
 latestFinish(T,L):-    task(T,_,_,L,_).
-usableMachine(T,M):-   task(T,_,_,_,L), member(M,L).
+usableMachine(T,M):-   task(T,_,_,_,Machs), member(M, Machs).
 machine(M):- numMachines(N), between(1,N,M).
 
 possibleStart( T, AvailableHours, H ):-
@@ -53,10 +53,10 @@ possibleStart( T, AvailableHours, H ):-
     between(EarliestStart,LatestStart,H).
 
 
-rangeOfUsedHours( T, PossibleStartTime, H ):-
+rangeOfUsedHours( T, StartTime, H ):-
     duration(T, D),
-    PossibleEndTime is PossibleStartTime+D,
-    between(PossibleStartTime, PossibleEndTime, H).
+    EndTime is StartTime+D-1,
+    between(StartTime, EndTime, H).
 
 
 %% Use the following types of symbolic propositional variables (you can add more):
@@ -73,43 +73,39 @@ eachTaskStartsOnce(AH):- % Also takes into account hours available!
     fail.
 eachTaskStartsOnce(_).
 
-eachTaskStartedIsUsedByAMachine:-
+eachTaskIsBindedToAMachine:-
     task(T),
     findall(machine-T-M, usableMachine(T, M), Lits),
     exactly(1, Lits),
     fail.
-eachTaskStartedIsUsedByAMachine.
+eachTaskIsBindedToAMachine.
 
-/*machineIsActiveOnHourH(AH):-
-    usableMachine(T1, M),  usableMachine(T2, M),  T1 \= T2,
-    duration(T1, D1),
-    possibleStart(T1, AH, H1),  possibleStart(T2, AH, H2),
-    TimeH1 is H1 + D1,
-    TimeH1 < H2,
-    writeClause( [\+start-T1-H1, \+machine-T1-M, start-T2-H2, machine-T2-M] ),
-    fail.*/
-machineIsActiveOnHourH(AH):-
-    possibleStart(T, AH, HStart),
-    findall(active-T-H, rangeOfUsedHours(T, HStart, H), Lits),
-    writeClause( [\+start-T-HStart| Lits] ),
+
+taskIsActiveOnHoursAfterStart(AH):-
+    possibleStart(T, AH, HS),
+    rangeOfUsedHours(T, HS, H),
+    writeClause( [\+start-T-HS, active-T-H] ), 
     fail.
-machineIsActiveOnHourH(_).
+taskIsActiveOnHoursAfterStart(_).
 
-noTasksCanOverlap(AH):-
-    %task(T1), task(T2),
-    between(0, AH, H),
-    findall(active-T-H, task(T), Lits),
-    atMost(1, Lits),
+noTaskCanStartBetweenOther(AH):-
+    possibleStart(T, AH, HS),
+    rangeOfUsedHours(T, HS, H),
+    usableMachine(T, M),
+    task(T2), T \= T2,
+    writeClause( [\+start-T-HS, \+machine-T-M, \+start-T2-H, \+machine-T2-M] ), 
     fail.
-noTasksCanOverlap(_).
-
+noTaskCanStartBetweenOther(_).
 
 writeClauses(AvailableHours):- 
-    eachTaskStartsOnce(AvailableHours),
-    eachTaskStartedIsUsedByAMachine,
-    machineIsActiveOnHourH(AvailableHours),
+    eachTaskStartsOnce(AvailableHours), 
+    eachTaskIsBindedToAMachine,
+
+    taskIsActiveOnHoursAfterStart(AvailableHours),
+    noTaskCanStartBetweenOther(AvailableHours),
+
+    
     %tmp(AvailableHours),
-    %...
     true, !.
 
 

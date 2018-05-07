@@ -5,58 +5,39 @@ c
 c using 2 as default phase
 c
 c parsing infile.cnf
-c parsed header 'p cnf 278 1228'
-c initialized 278 variables
-c found 1228 non trivial clauses
+c parsed header 'p cnf 272 5621'
+c initialized 272 variables
+c found 5621 non trivial clauses
 c
 c random number generator seed 0
 c 
 c  seconds     variables   original    learned     agility
 c         level        used      conflicts    limit          MB
 c 
-c s   0.0   0.0   277   0.4   104     0     0     0   0.0   0.1 
-c 
-c initial reduction limit 1000 clauses
-c 
-c 1   0.0 134.5   277   0.4   104     0     0  1000   0.0   0.1 
+c 0   0.0   0.0   271  58.8  4552     1  1293     0   0.0   0.4 
 c 
 c  seconds     variables   original    learned     agility
 c         level        used      conflicts    limit          MB
 c 
-s SATISFIABLE
-v -1 -2 -3 -4 -5 -6 -7 -8 -9 -10 11 -12 -13 -14 -15 -16 -17 -18 -19 -20 -21 -22
-v -23 -24 -25 -26 -27 -28 29 -30 -31 -32 -33 -34 -35 -36 -37 -38 -39 -40 -41
-v -42 -43 -44 -45 -46 -47 -48 -49 -50 -51 -52 -53 -54 -55 -56 -57 -58 59 -60
-v -61 -62 -63 -64 -65 -66 -67 -68 -69 -70 -71 -72 -73 -74 -75 -76 -77 -78 -79
-v -80 -81 -82 -83 -84 -85 -86 -87 -88 89 -90 -91 -92 -93 -94 -95 -96 -97 98 -99
-v 100 -101 102 -103 -104 105 106 -107 108 109 110 111 112 113 114 115 116 117
-v 118 119 120 121 122 123 124 125 126 127 128 129 130 131 132 133 134 135 136
-v 137 138 139 140 141 142 143 144 145 146 147 148 149 150 151 152 153 154 155
-v 156 157 158 159 160 161 162 163 164 165 166 167 168 169 170 171 172 173 174
-v 175 176 177 178 179 180 181 182 183 184 185 186 187 188 189 190 191 192 193
-v 194 195 196 197 198 199 200 201 202 203 204 205 206 207 208 209 210 211 212
-v 213 214 215 216 217 218 219 220 221 222 223 224 225 226 227 228 229 230 231
-v 232 233 234 235 236 237 238 239 240 241 242 243 244 245 246 247 248 249 250
-v 251 252 253 254 255 256 257 258 259 260 261 262 263 264 265 266 267 268 269
-v 270 271 272 273 274 275 276 277 278 0
+s UNSATISFIABLE
 c
 c 0 iterations
 c 0 restarts
 c 0 failed literals
-c 0 conflicts
-c 268 decisions
+c 1 conflicts
+c 0 decisions
 c 1 fixed variables
-c 0 learned literals
+c 3879 learned literals
 c 0.0% deleted literals
-c 2637 propagations
-c 2659 visits
-c 0.4% variables used
+c 0 propagations
+c 0 visits
+c 58.8% variables used
 c 0.0 seconds in library
-c 3.2 megaprops/second
-c 3.3 megavisits/second
-c probing 0.0 seconds 32%
-c 1 simplifications
+c 0.0 megaprops/second
+c 0.0 megavisits/second
+c probing 0.0 seconds 0%
+c 0 simplifications
 c 0 reductions
 c 0.0 MB recycled
-c 0.1 MB maximally allocated
+c 0.4 MB maximally allocated
 c 0.0 seconds total run time
