@@ -11,7 +11,7 @@ symbolicOutput(0). % set to 1 to see symbolic output only; 0 otherwise.
 %% good solutions quickly, proving optimality if possible.
 
 %% The little toy example below has the following optimal solution:
-:- include(tasks2).  % Toy example
+:- include(tasks0).  % Toy example
 %:- include(tasks1).  
 %:- include(tasks2).  
 %:- include(tasks3).  
@@ -43,9 +43,9 @@ earliestStart(T,E):-   task(T,_,E,_,_).
 latestFinish(T,L):-    task(T,_,_,L,_).
 usableMachine(T,M):-   task(T,_,_,_,Machs), member(M, Machs).
 machine(M):- numMachines(N), between(1,N,M).
-hour(H) :- availableHours(MAX_H), between(0, MAX_H, H).
 
 
+% Given a task T and availableHours, return H hours where T can start
 possibleStart( T, AvailableHours, H ):-
     duration(T,D),
     earliestStart(T,EarliestStart),
@@ -55,6 +55,7 @@ possibleStart( T, AvailableHours, H ):-
     between(EarliestStart,LatestStart,H).
 
 
+% Given a task T and a StartTime (of T, of course), return H hours used by T
 rangeOfUsedHours( T, StartTime, H ):-
     duration(T, D),
     EndTime is StartTime+D-1,
@@ -65,8 +66,7 @@ rangeOfUsedHours( T, StartTime, H ):-
 %   1. start-T-H     means:  "task T starts at hour H"     (MANDATORY)
 %   2. machine-T-M   means:  "task T uses machine M"       (MANDATORY)
 
-%  3a. active-T-H    means:  "task T is active at hour H"
-%  3b. use-T-H-M    means:  "task T is active at hour H on machine M"
+%   3. active-T-H    means:  "task T is active at hour H"
 % =====================================================================
 
 eachTaskStartsOnce(AH):- % Also takes into account hours available!
@@ -75,7 +75,6 @@ eachTaskStartsOnce(AH):- % Also takes into account hours available!
     exactly(1, Lits), 
     fail.
 eachTaskStartsOnce(_).
-
 
 eachTaskIsBindedToAMachine:-
     task(T),
@@ -86,32 +85,36 @@ eachTaskIsBindedToAMachine.
 
 
 taskIsActiveOnHoursAfterStart(AH):-
-    task(T), 
-    machine(M),
     possibleStart(T, AH, HS),
     rangeOfUsedHours(T, HS, H),
-    writeClause( [\+start-T-HS, \+machine-T-M, use-T-H-M] ), 
+    writeClause( [\+start-T-HS, active-T-H] ), 
     fail.
 taskIsActiveOnHoursAfterStart(_).
 
-
-maxTaskPerHour:-
-    machine(M), hour(H),
-    findall(use-T-H-M, task(T), Lits),
-    atMost(1, Lits),
+noTaskCanStartBetweenAnotherOne(AH):-
+    usableMachine(T, M),
+    possibleStart(T, AH, HS),
+    
+    findall([\+start-T2-H, \+machine-T2-M], 
+    	(task(T2), T \= T2, rangeOfUsedHours(T, HS, H)), 
+    	Lits),
+    
+    %nl, nl, nl, write("LITERALS   -------> \n"), write(T), nl, write(Lits), nl, nl, nl,
+    %expressAnd( [\+start-T-HS, \+machine-T-M],  Lits),
+    
+% Funcional pero lento para el toy
+% "Si una tarea T empieza en hora HS y maq M, no puede empezar otra tarea en horas H y en maq M "
+    writeClause( [\+start-T-HS,\+machine-T-M,   \+start-T2-H, \+machine-T2-M] ), 
     fail.
-maxTaskPerHour.
-
-
-
+noTaskCanStartBetweenAnotherOne(_).
 
 
 
 writeClauses(AvailableHours):- 
     eachTaskStartsOnce(AvailableHours), 
     eachTaskIsBindedToAMachine,
+    noTaskCanStartBetweenAnotherOne(AvailableHours),
     taskIsActiveOnHoursAfterStart(AvailableHours),
-    maxTaskPerHour,
     true, !.
 
 
@@ -246,10 +249,12 @@ subsetOfSize(N,[X|L],[X|S]):- N1 is N-1, length(L,Leng), Leng>=N1, subsetOfSize(
 subsetOfSize(N,[_|L],   S ):-            length(L,Leng), Leng>=N,  subsetOfSize( N,L,S).
 
 % Express that Var is equivalent to the disjunction of Lits:
+% Var -> L1, Var -> L2, ...
 expressOr( Var, Lits ):- member(Lit,Lits), negate(Lit,NLit), writeClause([ NLit, Var ]), fail.
 expressOr( Var, Lits ):- negate(Var,NVar), writeClause([ NVar | Lits ]),!.
 
 % Express that Var is equivalent to the conjunction of Lits:
+% Var -> [L1 /\ L2, /\ ... /\ Ln]
 expressAnd( Var, Lits ):- negate(Var,NVar), member(Lit,Lits),  writeClause([ NVar, Lit ]), fail.
 expressAnd( Var, Lits ):- negateAll(Lits,NLits), writeClause([ Var | NLits ]),!.
 

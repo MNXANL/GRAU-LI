@@ -5,39 +5,81 @@ c
 c using 2 as default phase
 c
 c parsing infile.cnf
-c parsed header 'p cnf 272 5621'
-c initialized 272 variables
-c found 5621 non trivial clauses
+c parsed header 'p cnf 11785 226716'
+c initialized 11785 variables
+c found 226716 non trivial clauses
 c
 c random number generator seed 0
 c 
 c  seconds     variables   original    learned     agility
 c         level        used      conflicts    limit          MB
 c 
-c 0   0.0   0.0   271  58.8  4552     1  1293     0   0.0   0.4 
+c s   0.1   0.0 11785   0.0 79135     0     0     0   0.0   8.9 
+c 
+c initial reduction limit 1000 clauses
+c 
+c +   0.1 356.4 11785   7.9 79135   100   100  1100   3.6   9.1 
+c R   0.1 356.4 11785   7.9 79135   100   100  1100   3.6   9.1 
+c +   0.1 312.7 11785  11.5 79135   221   221  1210   2.2   9.1 
+c +   0.1 310.4 11785  12.9 79135   367   367  1331   2.5   9.2 
+c R   0.1 306.3 11785  12.9 79135   400   400  1331   3.2   9.2 
+c +   0.1 274.3 11785  15.3 79135   543   543  1464   3.3   9.2 
+c +   0.1 259.0 11785  17.2 79135   755   755  1610   2.6   9.3 
+c +   0.1 247.4 11785  19.6 79135  1011  1011  1771   2.9   9.4 
+c R   0.1 243.2 11785  20.1 79135  1203  1203  1771   2.7   9.4 
+c +   0.1 244.0 11785  20.2 79135  1320  1320  1948   3.5   9.5 
+c +   0.1 238.1 11785  22.5 79135  1693  1693  2142   3.5   9.6 
+c +   0.1 232.3 11785  24.9 79135  2144  2144  2356   3.0   9.8 
+c +   0.2 231.0 11785  25.6 79135  2689  1484  2591   2.8   9.5 
+c R   0.2 235.2 11785  25.9 79135  3210  2005  2591   2.5   9.7 
+c +   0.2 228.6 11785  26.0 79135  3348  2143  2850   2.5   9.7 
+c +   0.2 217.3 11785  26.1 79135  4145  2940  3135   4.0  10.0 
+c +   0.3 210.1 11785  26.4 79135  5109  2298  3448   2.7   9.7 
+c +   0.3 201.2 11785  26.6 79135  6275  3464  3792   2.1  10.1 
+c +   0.3 193.7 11785  26.7 79135  7685  2959  4171   3.0   9.8 
+c R   0.4 193.1 11785  27.8 79135  8035  3309  4171   3.0   9.9 
+c 
+c  seconds     variables   original    learned     agility
+c         level        used      conflicts    limit          MB
+c 
+c +   0.4 186.9 11785  27.9 79135  9391  2558  4588   3.7   9.6 
+c +   0.5 175.7 11785  28.1 79135 11455  2311  5046   3.7   9.6 
+c +   0.6 169.5 11785  28.1 79135 13952  4808  5550   2.8  10.6 
+c +   0.7 163.6 11785  29.3 79135 16973  5003  6105   3.2  10.7 
+c R   0.8 157.8 11785  29.4 79135 19281  4239  6105   2.8  10.2 
+c +   0.8 155.2 11785  29.4 79135 20628  5584  6715   3.3  10.7 
+c +   1.0 145.9 11785  29.4 79135 25050  6600  7386   3.4  10.8 
+c +   1.1 138.5 11785  29.4 79135 30400  4527  8124   3.3  10.0 
+c +   1.4 131.9 11785  29.4 79135 36873  6867  8936   4.4  11.3 
+c +   1.7 124.5 11785  29.4 79135 44705  5698  9829   3.1  10.5 
+c R   1.7 124.4 11785  29.4 79135 44965  5958  9829   4.8  10.7 
+c +   2.0 117.1 11785  29.4 79135 54181  5306 10811   2.7  10.2 
+c s   2.4 113.1 11432  30.9 64057 60069  3774 10811   2.7   9.6 
+c R   2.4 113.1 11432  30.9 64057 60069  3774 10811   2.6   9.6 
+c 0   2.4 113.0  9568  38.9 64057 60195  3887 10811   3.1   9.6 
 c 
 c  seconds     variables   original    learned     agility
 c         level        used      conflicts    limit          MB
 c 
 s UNSATISFIABLE
 c
-c 0 iterations
-c 0 restarts
-c 0 failed literals
-c 1 conflicts
-c 0 decisions
-c 1 fixed variables
-c 3879 learned literals
-c 0.0% deleted literals
-c 0 propagations
-c 0 visits
-c 58.8% variables used
-c 0.0 seconds in library
-c 0.0 megaprops/second
-c 0.0 megavisits/second
-c probing 0.0 seconds 0%
-c 0 simplifications
-c 0 reductions
-c 0.0 MB recycled
-c 0.4 MB maximally allocated
-c 0.0 seconds total run time
+c 6 iterations
+c 189 restarts
+c 325 failed literals
+c 60195 conflicts
+c 246872 decisions
+c 2217 fixed variables
+c 2749664 learned literals
+c 18.2% deleted literals
+c 32932885 propagations
+c 75259137 visits
+c 38.9% variables used
+c 2.4 seconds in library
+c 14.0 megaprops/second
+c 31.9 megavisits/second
+c probing 0.1 seconds 5%
+c 2 simplifications
+c 15 reductions
+c 22.3 MB recycled
+c 12.3 MB maximally allocated
+c 2.4 seconds total run time
