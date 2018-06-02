@@ -1,6 +1,7 @@
 
 numMachines(7).
 availableHours(80).
+% #task=1, duration=15h, firstStart=17, lastFinish=49, usableMachines=[1,3]).
 task(1,16,2,75,[1,7]).
 task(2,19,6,67,[4,6]).
 task(3,10,4,76,[6,7]).

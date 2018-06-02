@@ -11,7 +11,7 @@ symbolicOutput(0). % set to 1 to see symbolic output only; 0 otherwise.
 %% good solutions quickly, proving optimality if possible.
 
 %% The little toy example below has the following optimal solution:
-:- include(tasks0).  % Toy example
+%:- include(tasks0).  % Toy example
 %:- include(tasks1).  
 %:- include(tasks2).  
 %:- include(tasks3).  
@@ -43,6 +43,7 @@ earliestStart(T,E):-   task(T,_,E,_,_).
 latestFinish(T,L):-    task(T,_,_,L,_).
 usableMachine(T,M):-   task(T,_,_,_,Machs), member(M, Machs).
 machine(M):- numMachines(N), between(1,N,M).
+hour(H) :- availableHours(MAX_H), between(0, MAX_H, H).
 
 
 % Given a task T and availableHours, return H hours where T can start
@@ -94,17 +95,9 @@ taskIsActiveOnHoursAfterStart(_).
 noTaskCanStartBetweenAnotherOne(AH):-
     usableMachine(T, M),
     possibleStart(T, AH, HS),
-    
-    findall([\+start-T2-H, \+machine-T2-M], 
-    	(task(T2), T \= T2, rangeOfUsedHours(T, HS, H)), 
-    	Lits),
-    
-    %nl, nl, nl, write("LITERALS   -------> \n"), write(T), nl, write(Lits), nl, nl, nl,
-    %expressAnd( [\+start-T-HS, \+machine-T-M],  Lits),
-    
-% Funcional pero lento para el toy
-% "Si una tarea T empieza en hora HS y maq M, no puede empezar otra tarea en horas H y en maq M "
-    writeClause( [\+start-T-HS,\+machine-T-M,   \+start-T2-H, \+machine-T2-M] ), 
+    rangeOfUsedHours(T, HS, H),
+    task(T2), T \= T2, 
+    writeClause( [\+start-T-HS, \+machine-T-M,   \+start-T2-H, \+machine-T2-M] ), 
     fail.
 noTaskCanStartBetweenAnotherOne(_).
 
@@ -133,7 +126,7 @@ displayMachine(M,Mach):- nl, availableHours(AH), between(1,AH,H), 0 is H mod 2, 
 displayMachine(_,_):- nl.
     
 writeX(H,M,Mach):- member(machine-T-Mach,M), member(start-T-S,M), duration(T,D), F is S+D-1, between(S,F,H),
-		   X is T mod 10, write(X), !.
+           X is T mod 10, write(X), !.
 writeX(_,_,_):- write(' '),!. 
 
 writeS(H,M,Mach):- member(machine-T-Mach,M), member(start-T-S,M), (H is S+3;H is S+2), writeNum2(T), !.

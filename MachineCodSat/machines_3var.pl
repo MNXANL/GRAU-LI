@@ -11,7 +11,7 @@ symbolicOutput(0). % set to 1 to see symbolic output only; 0 otherwise.
 %% good solutions quickly, proving optimality if possible.
 
 %% The little toy example below has the following optimal solution:
-:- include(tasks2).  % Toy example
+:- include(tasks0).  % Toy example
 %:- include(tasks1).  
 %:- include(tasks2).  
 %:- include(tasks3).  

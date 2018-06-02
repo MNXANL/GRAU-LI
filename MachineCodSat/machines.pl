@@ -11,11 +11,11 @@ symbolicOutput(0). % set to 1 to see symbolic output only; 0 otherwise.
 %% good solutions quickly, proving optimality if possible.
 
 %% The little toy example below has the following optimal solution:
-:- include(tasks2).  % Toy example
-%:- include(tasks1).  
-%:- include(tasks2).  
-%:- include(tasks3).  
-%:- include(tasks4).  
+:- include(tasks0).   % 33 h | Toy example
+%:- include(tasks1).  % 53 h
+%:- include(tasks2).  % 62 h
+%:- include(tasks3).  % 63 h
+%:- include(tasks4).  % 63 h
 
 
 %% plan found that takes 33 hours 
@@ -46,6 +46,15 @@ machine(M):- numMachines(N), between(1,N,M).
 hour(H) :- availableHours(MAX_H), between(0, MAX_H, H).
 
 
+%% Use the following types of symbolic propositional variables (you can add more):
+%   1. start-T-H     means:  "task T starts at hour H"     (MANDATORY)
+%   2. machine-T-M   means:  "task T uses machine M"       (MANDATORY)
+
+%   3. active-T-H    means:  "task T is active at hour H"
+% =====================================================================
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% AUX VARS %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+% Given a task T and availableHours, return H hours where T can start
 possibleStart( T, AvailableHours, H ):-
     duration(T,D),
     earliestStart(T,EarliestStart),
@@ -55,19 +64,13 @@ possibleStart( T, AvailableHours, H ):-
     between(EarliestStart,LatestStart,H).
 
 
+% Given a task T and a StartTime (of T, of course), return H hours used by T
 rangeOfUsedHours( T, StartTime, H ):-
     duration(T, D),
     EndTime is StartTime+D-1,
     between(StartTime, EndTime, H).
 
-
-%% Use the following types of symbolic propositional variables (you can add more):
-%   1. start-T-H     means:  "task T starts at hour H"     (MANDATORY)
-%   2. machine-T-M   means:  "task T uses machine M"       (MANDATORY)
-
-%  3a. active-T-H    means:  "task T is active at hour H"
-%  3b. use-T-H-M    means:  "task T is active at hour H on machine M"
-% =====================================================================
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%% END AUX VARS %%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
 
 eachTaskStartsOnce(AH):- % Also takes into account hours available!
     task(T), 
@@ -76,7 +79,6 @@ eachTaskStartsOnce(AH):- % Also takes into account hours available!
     fail.
 eachTaskStartsOnce(_).
 
-
 eachTaskIsBindedToAMachine:-
     task(T),
     findall(machine-T-M, usableMachine(T, M), Lits),
@@ -84,26 +86,22 @@ eachTaskIsBindedToAMachine:-
     fail.
 eachTaskIsBindedToAMachine.
 
-
 taskIsActiveOnHoursAfterStart(AH):-
-    task(T), 
-    machine(M),
     possibleStart(T, AH, HS),
     rangeOfUsedHours(T, HS, H),
-    writeClause( [\+start-T-HS, \+machine-T-M, use-T-H-M] ), 
+    writeClause( [\+start-T-HS, active-T-H] ), 
     fail.
 taskIsActiveOnHoursAfterStart(_).
 
-
-maxTaskPerHour:-
-    machine(M), hour(H),
-    findall(use-T-H-M, task(T), Lits),
-    atMost(1, Lits),
+noTaskCanStartBetweenAnotherOne(AH):-
+    usableMachine(T, M),
+    usableMachine(T2, M), T \= T2, 
+    possibleStart(T, AH, HS),
+    rangeOfUsedHours(T, HS, H),
+    writeClause( [\+start-T-HS,\+machine-T-M,   \+active-T2-H, \+machine-T2-M] ), 
+    %writeClause( [\+machine-T-M, \+machine-T2-M,   \+start-T-HS, \+active-T2-H] ), 
     fail.
-maxTaskPerHour.
-
-
-
+noTaskCanStartBetweenAnotherOne(_).
 
 
 
@@ -111,7 +109,7 @@ writeClauses(AvailableHours):-
     eachTaskStartsOnce(AvailableHours), 
     eachTaskIsBindedToAMachine,
     taskIsActiveOnHoursAfterStart(AvailableHours),
-    maxTaskPerHour,
+    noTaskCanStartBetweenAnotherOne(AvailableHours),
     true, !.
 
 
@@ -130,7 +128,7 @@ displayMachine(M,Mach):- nl, availableHours(AH), between(1,AH,H), 0 is H mod 2, 
 displayMachine(_,_):- nl.
     
 writeX(H,M,Mach):- member(machine-T-Mach,M), member(start-T-S,M), duration(T,D), F is S+D-1, between(S,F,H),
-		   X is T mod 10, write(X), !.
+           X is T mod 10, write(X), !.
 writeX(_,_,_):- write(' '),!. 
 
 writeS(H,M,Mach):- member(machine-T-Mach,M), member(start-T-S,M), (H is S+3;H is S+2), writeNum2(T), !.
@@ -246,10 +244,12 @@ subsetOfSize(N,[X|L],[X|S]):- N1 is N-1, length(L,Leng), Leng>=N1, subsetOfSize(
 subsetOfSize(N,[_|L],   S ):-            length(L,Leng), Leng>=N,  subsetOfSize( N,L,S).
 
 % Express that Var is equivalent to the disjunction of Lits:
+% Var -> L1, Var -> L2, ...
 expressOr( Var, Lits ):- member(Lit,Lits), negate(Lit,NLit), writeClause([ NLit, Var ]), fail.
 expressOr( Var, Lits ):- negate(Var,NVar), writeClause([ NVar | Lits ]),!.
 
 % Express that Var is equivalent to the conjunction of Lits:
+% Var -> [L1 /\ L2, /\ ... /\ Ln]
 expressAnd( Var, Lits ):- negate(Var,NVar), member(Lit,Lits),  writeClause([ NVar, Lit ]), fail.
 expressAnd( Var, Lits ):- negateAll(Lits,NLits), writeClause([ Var | NLits ]),!.
 

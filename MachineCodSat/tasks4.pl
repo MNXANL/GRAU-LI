@@ -1,6 +1,7 @@
 
 numMachines(7).
 availableHours(100).
+% #task=1, duration=15h, firstStart=17, lastFinish=49, usableMachines=[1,3]).
 task(1,16,2,75,[1,7]).
 task(2,19,6,86,[4,6]).
 task(3,10,4,85,[5,7]).
@@ -42,3 +43,5 @@ task(38,13,4,90,[1,5]).
 task(39,21,10,90,[5,6]).
 task(40,7,11,98,[6,7]).
 
+
+333333333333333

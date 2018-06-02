@@ -25,40 +25,41 @@ ejemplo2( [10,4,8,5,6], [5,3,4,0,5,0,5,2,2,0,1,5,1] ).
 ejemplo3( [11,5,4], [3,2,3,1,1,1,1,2,3,2,1] ).
 
 
-p:-	ejemplo1(RowSums,ColSums),
+
+listVars(N, L):- length(L, N).
+
+matrixByRows([], _, []).
+matrixByRows(List, NC, [Col|Cols]):-
+	append(Col, Residual, List),
+	length(Col, NC),
+	matrixByRows(Residual, NC, Cols),
+	true.
+	
+declareConstraints([C|MC], [R|MR], [Cx|CS], [Rx|RS], ColSums):-
+	X in 0..1,
+	sum([A,B,C], #=, R),
+	declareConstraints(MC, RS, ColSums)
+	true.
+
+
+p:-	ejemplo3(RowSums,ColSums),
 	length(RowSums,NumRows),
 	length(ColSums,NumCols),
 	NVars is NumRows*NumCols,
 	listVars(NVars,L),  % generate a list of Prolog vars (their names do not matter)
-	% ...
-	% X in 0..9, 	% If just a VARiable
-	% L ins 0..9,	% If [LIST]
-	% ...
-	% allDifferent([]),
-	% ...
+	L ins 0..1,
+	%...
 	matrixByRows(L,NumCols,MatrixByRows),
-	transpose(/*...*/),
-	declareConstraints(/*...*/),
+	write('MBR\n'), write(MatrixByRows), nl, 
+	%transpose(MatrixByRows, MatrixByCols),
 	
-	% label([X, Y, Z]),
-	% ...
-	% labeling(DECISIONORDER, [X, Y, Z]),
-	% labeling([max(Z), [min(X), ...] ], [X, Y, Z]),
+	declareConstraints(MatrixByCols, RowSums, ColSums),
 	
 	pretty_print(RowSums,ColSums,MatrixByRows).
 
 
-pretty_print(_,ColSums,_):- 
-	write('     '), 
-	member(S,ColSums), 
-	writef('%2r ', [S]), fail.
-pretty_print(RowSums,_,M):- 
-	nl, nth1(N,M,Row), 
-	nth1(N,RowSums,S), nl, 
-	writef('%3r   ', [S]), 
-	member(B,Row), 
-	wbit(B), fail.
+pretty_print(_,ColSums,_):- write('     '), member(S,ColSums), writef('%2r ',[S]), fail.
+pretty_print(RowSums,_,M):- nl,nth1(N,M,Row), nth1(N,RowSums,S), nl, writef('%3r   ',[S]), member(B,Row), wbit(B), fail.
 pretty_print(_,_,_).
 wbit(1):- write('*  '),!.
 wbit(0):- write('   '),!.
-    
