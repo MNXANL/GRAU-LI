@@ -13,21 +13,35 @@ ejemplo(5,175, [81,64,56,55,51,43,39,38,35,33,31,30,29,20,18,16,14,9,8,5,4,3,2,1
 
 
 insideBigSquare(_, Big, [S|Sides], [V|Vars]):- 
-    (S+V) #=< (Big+1),    
+    V #=< (Big-S+1),    
     insideBigSquare(_, Big, Sides, Vars).
 insideBigSquare(_, _, [], []).
 
-nonoverlapping(N, Sides, RowVars, ColVars):- 
+/*
+% HACK: Using disjoint2/1 predicate to prevent overlaps
+Let us define disjoint2(L):
+    - True iff rectangles don't overlap
+    - Rectangles are i-th elements of L of the form [Xi, Wi,  Yi, Hi] where (Xi, Yi) represent 
+      2D coordinates and (Wi, Hi) size in width and height.
 
+We set a recursion-generating call to generate such list, using (Xi, Yi) as Rows and Columns, and 
+Size as the size of the square (it is trivial that Wi=Hi!)
+*/
+setPositions([Size|Sides], [R|RowVars], [C|ColVars], [L|List]):-
+    L = rec(R, Size, C, Size), % recursion call
+    %write('L -> '), write(L), nl, DEBUG
+    setPositions(Sides, RowVars, ColVars, List),
     true.
+setPositions(_, [], [], []).
+
+
+nonoverlapping(_, Sides, RowVars, ColVars):- 
+    setPositions(Sides, RowVars, ColVars, List),
+    disjoint2(List).
 
 main:- 
-    %between(1, 3, Nex), 
-    %nl,nl,write('###################################################'),
-    %nl, write('#################### Ejemplo '), write(Nex), write(' ####################'), 
-    %nl, write('###################################################'), nl,
-    %nl,
-    ejemplo(0, Big, Sides),
+    NEx is 3,
+    ejemplo(NEx, Big, Sides),
     nl, write('Fitting all squares of size '), write(Sides), 
     write(' into big square of size '), write(Big), nl,nl,
     
@@ -45,11 +59,12 @@ main:-
     
     % Labeling and output
     append(RowVars, ColVars, ALL), labeling([ff], ALL),
-    displaySol(N,Sides,RowVars,ColVars), halt.
+    displaySol(N, Sides, RowVars, ColVars). % ,halt.
 
 
-displaySol(N,Sides,RowVars,ColVars):- 
-    between(1,N,Row), nl, between(1,N,Col),
+displaySol(N, Sides, RowVars, ColVars):- 
+    between(1,N,Row), nl, 
+    between(1,N,Col), %nl,
     nth1(K,Sides,S),    
     nth1(K,RowVars,RV),    RVS is RV+S-1,     between(RV,RVS,Row),
     nth1(K,ColVars,CV),    CVS is CV+S-1,     between(CV,CVS,Col),
